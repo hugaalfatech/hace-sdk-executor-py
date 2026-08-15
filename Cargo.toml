@@ -1,0 +1,31 @@
+[package]
+name = "hace-sdk-executor-py"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Python Executor — bridges Runinfer to Python NEP (llama-cpp-python via hace-llm-machine)"
+authors = ["CSA", "CTO"]
+
+[features]
+default = ["std"]
+std = ["hace-sdk-me-core/std", "hace-sdk-runinfer/std"]
+
+[dependencies]
+hace-sdk-me-core = { path = "../me-core" }
+hace-sdk-runinfer = { path = "../runinfer" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[lib]
+name = "hace_sdk_executor_py"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[test]]
+name = "rota_executor_py"
+path = "tests/rota_executor_py.rs"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full", "test-util"] }

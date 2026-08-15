@@ -1,0 +1,35 @@
+# Constants for executor-py
+# Authority: CSA
+
+constants:
+  RAC_SCHEME: "rac"
+  RAC_URI_PATTERN: "^rac://[a-z0-9.-]+/[a-z0-9._/-]+$"
+  SIO_FRAME_VERSION: "2.0.0"
+  
+  # Transport kinds
+  TRANSPORT_FFI: "ffi"
+  TRANSPORT_HOST_CALL: "host_call"
+  TRANSPORT_STDIO_IPC: "stdio_ipc"
+  
+  # Machine bindings
+  MACHINE_LION: "hace-lion-machine"
+  MACHINE_RION: "hace-rion-machine"
+  
+  # Specs
+  SPECS_FDI: "fdi"
+  SPECS_FPI: "fpi"
+  SPECS_FFI: "ffi"
+  
+  # Rules
+  RULE_CRI: "cri"
+  RULE_MCP: "mcp"
+  RULE_HTTP: "http"
+  RULE_CLI: "cli"
+  
+  # Default timeouts
+  DEFAULT_TIMEOUT_MS: 30000
+  DEFAULT_RETRIES: 3
+  
+  # FEH/ALR
+  FEH_ALGORITHM: "SHA-256"
+  ALR_PREFIX: "alr"

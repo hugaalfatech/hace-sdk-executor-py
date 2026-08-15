@@ -1,0 +1,148 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hace-executor-py"
+version = "0.1.0"
+description = "Python Native Fractal Executor SDK — mirrors hace-sdk-executor-cep (Rust)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Cosda-Dev", email = "dev@cosda.dev"}]
+keywords = ["rac", "executor", "fes", "cona", "hace"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    # Core dependencies
+    "aiohttp>=3.9",
+    "websockets>=12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+    "mypy>=1.7",
+    "ruff>=0.1",
+    "types-aiohttp>=3.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/executor_py"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/executor_py",
+]
+
+[tool.hatch.envs.default.scripts]
+check = "powershell scripts/check.ps1"
+test = "powershell scripts/test.ps1"
+crystallize = "powershell scripts/crystallize.ps1"
+seal = "powershell scripts/seal.ps1"
+
+[tool.executor-py]
+# FES model mapping: Actor (Engine) → Executor (Engine Part) → Module
+# Actor: text-ractor (Runtime Engine with Authority + Lifecycle)
+# Executor: executor-py (Engine Part — IPO processor in RAC router)
+# Module: individual capability implementations under src/executor_py/
+actor = "text-ractor"
+executor = "executor-py"
+fes_model = "IPO"
+
+# IPO Processing model: Executor module = MCV Controller in RAC router
+# Input  → normalize SIO, validate RAC URI, resolve ExecutionContext  
+# Process → Capor (WHAT) + Racor (HOW/WHERE) + execute domain operation
+# Output → finalize SIO, seal ALR/FEH, dispatch forward
+ipo_processor = true
+rac_router_role = "MCV_Controller"
+
+# FES DNA
+fes_layer = "executor"
+machine_binding = ["hace-lion-machine", "hace-rion-machine"]
+transports = ["fdi", "fpi", "ffi", "http", "ws"]
+
+# RAC Contracts
+rac_uri_version = "4"
+sio_format = "sio-fpi-json-v1"
+evidence_required = true
+
+# Canonical documents
+canon_docs = [
+    ".know/canon/FES.ail",
+    ".know/canon/FAN.ail", 
+    ".know/canon/hookpoints.ail",
+    ".know/canon/ASI.ail",
+    ".know/canon/IPO.ail",
+    ".know/canon/RAC_CONTRACTS.ail",
+]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+enable_error_code = ["unused-ignore", "redundant-cast"]
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["executor_py.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long (handled by line-length)
+    "B008",  # do not perform function calls in argument defaults
+]
+per-file-ignores = {"tests/*" = ["S101", "S106"]}  # allow assert and hardcoded passwords in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src/executor_py"]
+omit = ["tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

@@ -1,0 +1,46 @@
+# RAC FPI Routes — ail-machine capabilities
+# Per rac-uri-resolver.ail §2 grammar: rac://{rule}.{ownerspace}.{specs}/{path}
+# Authority: CSA
+
+routes:
+  - rac_uri: "rac://cri.hace.fpi/ail-machine"
+    rule: "cri"
+    ownerspace: "hace"
+    specs: "fpi"
+    path: "ail-machine"
+    capability: "ail-machine"
+
+    export:
+      enabled: true
+
+    authority:
+      ara_required: true
+      license_required: true
+
+    execution:
+      substrate: "stdio_ipc"
+      implementation: "executor_py"
+      runtime: "python"
+      machine: "hace-rion-machine"
+
+    lifecycle:
+      - "init"
+      - "handshake"
+      - "running"
+      - "suspending"
+      - "terminating"
+      - "terminated"
+      - "failed"
+
+    actions:
+      - "ail_machine.detect"
+      - "ail_machine.parse"
+      - "ail_machine.validate"
+      - "ail_machine.render"
+      - "ail_machine.format_e164"
+      - "ail_machine.slugify"
+      - "ail_machine.split_uri"
+      - "ail_machine.summary"
+
+    handler: "executor_py.io.rac.cri.bridge.ail_machine:AilMachineBridge"
+    description: "AIL Machine FPI instance for AIL document processing"

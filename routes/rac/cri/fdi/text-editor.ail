@@ -1,0 +1,58 @@
+# RAC FDI Routes — text-editor capabilities
+# Per rac-uri-resolver.ail §2 grammar: rac://{rule}.{ownerspace}.{specs}/{path}
+# Authority: CSA
+
+routes:
+  - rac_uri: "rac://cri.hace.fdi/text-editor"
+    rule: "cri"
+    ownerspace: "hace"
+    specs: "fdi"
+    path: "text-editor"
+    capability: "text-editor"
+
+    export:
+      enabled: true
+
+    authority:
+      ara_required: true
+      license_required: true
+
+    execution:
+      substrate: "in_process"
+      implementation: "executor_py"
+      runtime: "python"
+      machine: "hace-lion-machine"
+
+    actions:
+      - "text.read"
+      - "text.update"
+      - "text.create"
+      - "text.delete"
+      - "text.ensure_dir"
+
+    capabilities:
+      - "fdi.file.create_file"
+      - "fdi.file.read_file"
+      - "fdi.file.append_file"
+      - "fdi.file.delete_file"
+      - "fdi.file.ensure_dir"
+      - "fdi.str.headline"
+      - "fdi.str.snake"
+      - "fdi.str.slug"
+      - "fdi.str.kebab"
+      - "fdi.str.camel"
+      - "fdi.str.studly"
+      - "fdi.str.limit"
+      - "fdi.str.words"
+      - "fdi.str.squish"
+      - "fdi.str.contains"
+      - "fdi.str.starts_with"
+      - "fdi.str.ends_with"
+      - "fdi.str.before"
+      - "fdi.str.after"
+      - "fdi.str.between"
+      - "fdi.str.pad_left"
+      - "fdi.str.pad_right"
+
+    handler: "text_editor.io.rac.cri.fdi:rac_fdi_in"
+    description: "Text editor FDI facade for file/string/uri operations"

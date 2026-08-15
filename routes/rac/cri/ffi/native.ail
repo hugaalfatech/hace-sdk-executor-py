@@ -1,0 +1,36 @@
+# RAC FFI Routes — native capabilities
+# Per rac-uri-resolver.ail §2 grammar: rac://{rule}.{ownerspace}.{specs}/{path}
+# Authority: CSA
+
+routes:
+  - rac_uri: "rac://cri.hace.ffi/native"
+    rule: "cri"
+    ownerspace: "hace"
+    specs: "ffi"
+    path: "native"
+    
+    export:
+      enabled: true
+    
+    authority:
+      ara_required: true
+      license_required: true
+    
+    execution:
+      substrate: "native"
+      implementation: "executor_py"
+      runtime: "python"
+      machine: "hace-lion-machine"
+    
+    actions:
+      - "native.spawn"
+      - "native.call"
+      - "native.memory"
+    
+    capabilities:
+      - "ffi.process.spawn"
+      - "ffi.memory.alloc"
+      - "ffi.memory.free"
+    
+    handler: "executor_py.io.rac.cri.ffi:FfiExecutor"
+    description: "Native FFI bridge for process and memory operations"

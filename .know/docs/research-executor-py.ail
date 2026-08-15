@@ -1,0 +1,39 @@
+# CONA://executor.py.v1/research — Python Executor Research
+
+## Dual Implementation
+
+### 1. Python Package (src/executor_py/)
+- **Build**: hatchling, packages=["src/executor_py"]
+- **Deps**: aiohttp, websockets
+- **Dev**: pytest-asyncio, mypy, ruff
+- **Scripts**: check, test, crystallize, seal (PowerShell)
+
+### FES DNA (tool.executor-py)
+```toml
+actor = "text-ractor"
+executor = "executor-py"
+fes_model = "IPO"
+ipo_processor = true
+rac_router_role = "MCV_Controller"
+fes_layer = "executor"
+machine_binding = ["hace-lion-machine", "hace-rion-machine"]
+transports = ["fdi", "fpi", "ffi", "http", "ws"]
+rac_uri_version = "4"
+sio_format = "sio-fpi-json-v1"
+evidence_required = true
+```
+
+### 2. Rust PyO3 Bridge (src/lib.rs)
+- **Crate**: `hace-sdk-executor-py`
+- **Deps**: `hace-sdk-me-core`, `hace-sdk-runinfer`, `pyo3 0.22 (extension-module)`
+- **Implements**: `MactorBackend` trait using llama-cpp-python via PyO3
+- **PythonExecutor** struct with: `python`, `llama`, `fingerprint`, `health`, `config`, `lifecycle`, `model_path`
+- **Hooks**: `PythonExecutorHook` binding to FEM lifecycle (init/health/stop)
+
+## Tests
+- Rust: 3 inline tests (config, lifecycle, hook_id)
+- Python: pytest with scripts/test.ps1
+
+## Status
+- **Complete**: Both Python package + Rust bridge present
+- **Build**: `cargo build -p hace-sdk-executor-py` + `python -m pip install -e .`

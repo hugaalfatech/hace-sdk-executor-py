@@ -1,0 +1,133 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.hookpoints.v1
+  intent: HOK_HOOKPOINT_REGISTRY
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+---
+
+# Hookpoint Registry (hok:// namespace)
+# Authority: CSA-sealed
+
+## 1. Canonical Hookpoint Contract
+
+Hookpoints provide cross-cutting concerns for IPO pipeline without modifying core logic.
+
+```yaml
+hookpoint_contract:
+  namespace: "hok://executor-py"
+  phases: ["pre_input", "post_input", "pre_process", "post_process", "pre_output", "post_output", "on_error", "on_evidence"]
+  binding: "fan_capability + hookpoint_id"
+```
+
+## 2. Executor-Py Hookpoints
+
+```yaml
+hookpoints:
+  - id: "hok://executor-py/pre_input"
+    phase: "pre_input"
+    description: "Called before IPO.input() - normalize RAC URI, validate SIO"
+    bound_handlers: []
+    priority: 100
+
+  - id: "hok://executor-py/post_input"
+    phase: "post_input"
+    description: "Called after IPO.input() - enrich ExecContext, inject trace"
+    bound_handlers: []
+    priority: 100
+
+  - id: "hok://executor-py/pre_process"
+    phase: "pre_process"
+    description: "Called before Capor/Racor resolution - policy checks, quotas"
+    bound_handlers: []
+    priority: 200
+
+  - id: "hok://executor-py/post_process"
+    phase: "post_process"
+    description: "Called after process() - route validation, machine selection"
+    bound_handlers: []
+    priority: 200
+
+  - id: "hok://executor-py/pre_output"
+    phase: "pre_output"
+    description: "Called before IPO.output() - pre-finalize SIO envelope"
+    bound_handlers: []
+    priority: 100
+
+  - id: "hok://executor-py/post_output"
+    phase: "post_output"
+    description: "Called after IPO.output() - finalize, seal evidence, dispatch"
+    bound_handlers: []
+    priority: 100
+
+  - id: "hok://executor-py/on_error"
+    phase: "on_error"
+    description: "Called on any ExecuteError - logging, telemetry, recovery"
+    bound_handlers: []
+    priority: 300
+
+  - id: "hok://executor-py/on_evidence"
+    phase: "on_evidence"
+    description: "Called when SepiProof is built - FEH/ALR sealing audit"
+    bound_handlers: []
+    priority: 300
+
+  # FDI-specific hookpoints
+  - id: "hok://executor-py/fdi/pre_autoload"
+    phase: "pre_process"
+    description: "Before FDI autoload - validate wire path"
+    bound_handlers: []
+    priority: 150
+
+  - id: "hok://executor-py/fdi/post_autoload"
+    phase: "post_process"
+    description: "After FDI autoload - cache module, verify connection"
+    bound_handlers: []
+    priority: 150
+
+  # FPI-specific hookpoints
+  - id: "hok://executor-py/fpi/pre_discover"
+    phase: "pre_process"
+    description: "Before FPI discovery - scan wireless endpoints"
+    bound_handlers: []
+    priority: 150
+
+  - id: "hok://executor-py/fpi/post_pair"
+    phase: "post_process"
+    description: "After FPI pairing - establish session, exchange keys"
+    bound_handlers: []
+    priority: 150
+```
+
+## 3. Binding Protocol
+
+```yaml
+binding_protocol:
+  register:
+    - "CSA approves hookpoint registration via hok://executor-py/{phase}/{name}"
+    - "Handler MUST be a FanCapability registered in FanRegistry"
+    - "Priority determines execution order (lower = earlier)"
+  
+  invoke:
+    - "IpoOrchestrator calls hookpoints at each phase"
+    - "Context passed: ExecContext, FanId, IpoInput/IpoProcess/IpoOutput"
+    - "Handler returns modified context or raises ExecuteError"
+  
+  audit:
+    - "Auditor verifies all hookpoint invocations produce ALR entries"
+    - "FEH hash includes hookpoint execution trace"
+```
+
+## 4. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+```

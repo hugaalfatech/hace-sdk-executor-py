@@ -1,0 +1,141 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.asi.v1
+  intent: ASI_ARTIFACT_SYSTEM_INTEGRATION
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.fan.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.hookpoints.v1"
+    - "AIL://hace.actor.executor.docs.actor-executor.v1"
+---
+
+# ASI — Artifact System Integration (4-Plane)
+# Authority: CSA-sealed
+
+## 1. Canonical 4-Plane Integration
+
+```text
+                    CONA (Executor-Py)
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+        ▼                ▼                ▼
+   ┌─────────┐     ┌──────────┐    ┌────────────┐
+   │ ASSEMBLE│     │ INTEGRATE│    │ VERIFY     │
+   └────┬────┘     └────┬─────┘    └─────┬──────┘
+        │               │                │
+        ▼               ▼                ▼
+   ┌─────────────────────────────────────────┐
+   │           CRYSTALLIZE                   │
+   │    (FEH + ALR sealed artifact)          │
+   └─────────────────────────────────────────┘
+```
+
+## 2. Four Planes
+
+### PLANE 1: ASSEMBLE (Import → Wire)
+```yaml
+assemble:
+  source: "T:/hace/engine/hace/sdk/executor-cep (Rust DNA)"
+  target: "T:/hace/engine/hace/sdk/executor-py (Python mirror)"
+  method: "1:1 trait/struct mirror via DNA registry"
+  imports:
+    - "ExecuteParticle trait → executor_py.ExecuteParticle (ABC)"
+    - "IpoFeature trait → executor_py.IpoFeature (ABC)"
+    - "CaporRouter trait → executor_py.CaporRouter (ABC)"
+    - "RacRouter trait → executor_py.RacRouter (ABC)"
+    - "SepiProof struct → executor_py.SepiProof (dataclass)"
+    - "FanId/FanCapability → executor_py.FanId/FanCapability (dataclass)"
+    - "RacUri V4 parser → executor_py.RacUri (dataclass)"
+    - "RacTransport trait → executor_py.RacTransport (ABC)"
+```
+
+### PLANE 2: INTEGRATE (Wire → Runtime)
+```yaml
+integrate:
+  actor_binding: "text-ractor → executor-py (MCV Controller)"
+  fan_registration: "FanRegistry auto-registers on import"
+  dna_registration: "ExecutorDNARegistry auto-registers on import"
+  transport_binding:
+    - "FDI → LocalNativeAdapter → hace-lion-machine"
+    - "FPI → StdioIpcAdapter → hace-rion-machine"
+    - "HTTP → HttpBridgeAdapter → hace-rion-machine"
+    - "gRPC → GrpcBridgeAdapter → hace-rion-machine"
+  hookpoint_binding: "hok://executor-py/* → IpoOrchestrator phases"
+```
+
+### PLANE 3: VERIFY (Test → Audit)
+```yaml
+verify:
+  rota_tests:
+    - "test_core_types.py: ExecuteParticle, ExecContext, SepiProof"
+    - "test_ipo_pipeline.py: input→process→output flow"
+    - "test_capor_resolution.py: WHAT capacity resolution"
+    - "test_racor_resolution.py: HOW/WHERE route resolution"
+    - "test_fdi_transport.py: wired autoload (USB/cable)"
+    - "test_fpi_transport.py: wireless discovery (bluetooth/NFC)"
+    - "test_evidence_sealing.py: FEH + ALR on every execute"
+    - "test_actor_executor_mapping.py: text-ractor → executor-py"
+  smoke_tests:
+    - "_mcp_wiring_smoke.py equivalent for executor-py"
+  conformance:
+    - "1:1 trait mapping with executor-cep (Rust)"
+    - "SIO-FPI v1 envelope compliance"
+    - "RAC URI V4 grammar compliance"
+    - "FEH/ALR sealing on every CAP invocation"
+```
+
+### PLANE 4: CRYSTALLIZE (Seal → Distribute)
+```yaml
+crystallize:
+  artifact: "hace-executor-py-{version}.pyz"
+  location: "T:/hace/engine/hace/sdk/executor-py/release/"
+  seal:
+    - "FEH hash of all source + tests + canon"
+    - "ALR entry in Archetype Ledger"
+    - "CSA signature on final/canon.ail"
+  distribution:
+    - "T:/CAW/partners/hace/bin/hace-executor-py/"
+    - "T:/workspaces/hace-rosa/forge/ (as dependency)"
+    - "PyPI: hace-executor-py"
+  promotion_gate:
+    - "ROTA: 33+ tests PASS"
+    - "CSA seal on final/canon.ail"
+    - "CVA audit: FEH/ALR verified"
+```
+
+## 3. Integration Points
+
+```yaml
+integration_points:
+  upstream:
+    - "hace/sdk/executor-cep (Rust DNA source)"
+    - "hace/actor/.know/docs/actor-executor.ail (Actor contract)"
+    - "hace/text-editor/.know/rc/rac-contracts.ail (RAC contracts)"
+    - "hace/io/rac/ (Transport DNA)"
+  
+  downstream:
+    - "py-text-editor (registers FanCapability)"
+    - "hace-rosa/forge/hace-cep-resolver (uses executor-py DNA)"
+    - "hace-rosa/forge/hace-lion-machine (local native runtime)"
+    - "hace-rosa/forge/hace-rion-machine (remote native runtime)"
+    - "hace-rosa/forge/hace-sio-stream (streaming transport)"
+  
+  lateral:
+    - "executor-rs (Rust native particles)"
+    - "executor-go / executor-ts / executor-php / executor-dart (polyglot)"
+```
+
+## 4. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+  asl: "ASI v1 — 4-plane integration complete"
+```

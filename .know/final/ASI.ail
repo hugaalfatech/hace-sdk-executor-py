@@ -1,0 +1,38 @@
+# CONA://executor.py.v1/ASI — Python Executor Artifact Seal Information
+
+## Artifact Identity
+
+| Field    | Value |
+|----------|-------|
+| Name     | `hace-executor-py` / `hace-sdk-executor-py` |
+| Cipher   | `CONA://executor.py.v1` |
+| Version  | `0.1.0` |
+| Layer    | NEP-PY (Python inference executor) |
+| Type     | Dual: Python package + Rust PyO3 bridge |
+
+## SEAL — Seal Information
+
+- Seal Type: `ARCHITECTURAL`
+- Canonical Basis: `tool.executor-py` FES DNA + MactorBackend impl
+- Validation: Rust 3 tests + Python pytest
+- Build: `cargo build -p hace-sdk-executor-py` + `pip install -e .`
+
+## FEH — Functional Engine Hash
+```
+FEH = BLAKE3("executor.py.v1" || fes_dna || mactor_backend || ipo_processor)
+```
+
+## ALR — Artifact Lifecycle Record
+
+| Event          | Timestamp | Agent | Status |
+|----------------|-----------|-------|--------|
+| Survey complete | 2026-08-15 | Finaliser | Done |
+| Canonical sync   | 2026-08-15 | Finaliser | Done |
+| Tests pass       | 2026-08-15 | Finaliser | Rust 3 + Python pytest |
+| Seal issued      | 2026-08-15 | Finaliser | Canonical |
+
+## CRI Compliance
+- CRI v1.0: MactorBackend trait conformant
+- CRI v1.0: IPO processor (MCV_Controller)
+- CRI v1.0: RAC URI v4, SIO-FPI-JSON-v1
+- CRI v1.0: Evidence required (ALR/FEH)

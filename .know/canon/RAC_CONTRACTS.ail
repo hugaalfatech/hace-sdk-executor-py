@@ -1,0 +1,320 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.rac-contracts.v1
+  intent: RAC_CRI_FDI_FPI_CONTRACTS
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+    - "AIL://hace.io.canon.rac-protocol.specs.v1"
+---
+
+# RAC Contracts — CRI / FDI / FPI
+# Authority: CSA-sealed
+
+## 1. RAC URI V4 Grammar (Canonical)
+
+```yaml
+uri_contract:
+  v4_grammar: "rac://{rule}.{ownerspace}.{specs}/{path}"
+  components:
+    rule: "cri | api | rpc | rti | ws | ex | on | net | a2a"
+    ownerspace: "hace | hacex | google-ai | local | platform"
+    specs: "fdi | ffi | fpi | wasm | grpc | http | pipe | shm"
+    path: "provider/actor/module/action (hierarchical)"
+  
+  examples:
+    - "rac://cri.hace.fdi/hace/executor-py/io/rac/cri/fdi"
+    - "rac://cri.hace.fpi/hace/executor-py/io/rac/cri/fpi"
+    - "rac://cri.local.fdi/hace/py-text-editor/file/read_file"
+  
+  transport_mapping:
+    fdi: "Ffi (in-process)"
+    ffi: "Ffi (in-process)"
+    fpi: "HostCall (host function call)"
+    wasm: "Wasm"
+    grpc: "GrpcBridge"
+    http: "HttpBridge"
+    pipe: "Pipe (UDS/named pipe)"
+    shm: "SharedMem"
+```
+
+## 2. CRI — Core RPC Interface
+
+```yaml
+cri_contract:
+  rule: "cri"
+  description: "Core RPC Interface — canonical transport binding"
+  specs:
+    - fdi    # File Descriptor I/O (wired)
+    - ffi    # Foreign Function Interface (direct)
+    - fpi    # Foreign Procedure Interface (wireless)
+    - wasm   # WebAssembly
+  machine_binding:
+    fdi: "hace-lion-machine"
+    ffi: "hace-lion-machine"
+    fpi: "hace-rion-machine"
+    wasm: "hace-lion-machine"
+```
+
+## 3. FDI — File Descriptor I/O (Wired / USB / Cable / Autoload)
+
+```yaml
+fdi_contract:
+  version: "1.1"
+  specs: "fdi"
+  transport: "Ffi"
+  machine: "hace-lion-machine"
+  motif: "USB cable / serial cable / named pipe / autoload.php"
+  
+  characteristics:
+    - "Direct wire connection: file descriptor, named pipe, UDS"
+    - "Autoload: executor module auto-discovers and loads on init"
+    - "Deterministic: fixed path, no discovery phase"
+    - "Low latency: single-hop, same-node"
+    - "In-process FFI: zero-copy, same memory space"
+  
+  methods:
+    autoload:
+      description: "Autoload executor module from FDI URI (plug in cable)"
+      input: {uri: "file:// or pipe:// or fd:// path"}
+      output: {autoload: bool, connected: bool}
+    
+    connect:
+      description: "Connect to FDI endpoint (cable attach)"
+      output: {connected: bool}
+    
+    disconnect:
+      description: "Disconnect FDI endpoint (cable detach)"
+      output: {connected: false}
+    
+    send:
+      description: "Send data over FDI wire"
+      input: {data: "bytes"}
+      output: {sent: int, status: "ok"}
+    
+    recv:
+      description: "Receive data over FDI wire"
+      output: {data: "bytes", status: "ok", received: int}
+  
+  registry: "FDIMethodRegistry (maps method_name → handler)"
+  autoload_mechanism: "resolve_fdi_module(module_path) → importlib"
+  
+  per_text_editor: "Mirrors text-editor/io/rac/cri/fdi.py (29 bindings)"
+```
+
+## 4. FPI — Foreign Procedure Interface (Wireless / Bluetooth / NFC)
+
+```yaml
+fpi_contract:
+  version: "1.0"
+  specs: "fpi"
+  transport: "HostCall"
+  machine: "hace-rion-machine"
+  motif: "Bluetooth / NFC / over-the-air discovery / pairing"
+  
+  characteristics:
+    - "Wireless discovery: executor discovers remote procedures"
+    - "Pairing: establishes a wireless link before invocation"
+    - "Broadcast: can multicast to multiple listeners"
+    - "Connection-oriented: stateful session after pairing"
+    - "Host function call: FFI bridge for local FPI"
+  
+  methods:
+    discover:
+      description: "Wireless service discovery (bluetooth scan)"
+      input: {endpoint?: "fpi://..."}
+      output: {endpoints: [str], count: int}
+    
+    pair:
+      description: "Pair with wireless endpoint (bluetooth pairing / NFC touch)"
+      input: {endpoint: "fpi://..."}
+      output: {paired: bool, session_id: str}
+    
+    unpair:
+      description: "Unpair from wireless endpoint (bluetooth disconnect)"
+      output: {paired: false}
+    
+    invoke:
+      description: "Invoke a remote procedure over the wireless link"
+      input: {method: str, args: dict}
+      output: {result: any, method: str}
+    
+    broadcast:
+      description: "Broadcast to multiple wireless listeners (multicast)"
+      input: {method: str, args: dict}
+      output: {broadcast: true, method: str, listeners: int}
+  
+  registry: "FPIMethodRegistry (maps method_name → {handler, transport, endpoint})"
+  transport_modes: ["bluetooth", "nfc", "host_call", "discovery", "pairing", "broadcast"]
+```
+
+## 5. RAC Method Contracts (Canonical)
+
+```yaml
+rac_methods:
+  call:
+    version: "1.0"
+    input: "SIORequest {method: 'call', actor: '<rac_uri>', payload: {action, value, options}}"
+    process:
+      - "_resolve_handler() — cache lookup → URI parse → lazy import + alias"
+      - "execute handler with signature inspection"
+      - "wrap result in SIOResponse.from_actor_response()"
+    output: "SIOResponse {status, result, error}"
+    transport: "FDI (direct) or LION (STDIO)"
+    rota_test_count: 28
+  
+  import:
+    version: "1.0"
+    input: "SIORequest {method: 'import', actor: '<rac_uri>', payload: {action}}"
+    output:
+      - "invocation_ref: module.function_name"
+      - "binding_type: FDI"
+      - "handler_module: import path"
+      - "handler_function: function name"
+    bridge_to: "FDI facade (import_binding())"
+    gap: "Currently returns descriptor only, not actual callable — wire into dispatch"
+  
+  instance:
+    version: "1.0"
+    status: "STUB"
+    current_response: '{"status": "instance created"}'
+    gap: "No open/execute/close lifecycle management"
+    required: "Add instance lifecycle API"
+    lifecycle: "open → execute → close"
+  
+  ping:
+    version: "1.0"
+    output:
+      - "status: healthy/unhealthy"
+      - "latency_ms: measured round-trip"
+      - "rac_verbs_supported: [call, import, instance, ping, stream]"
+      - "server: server info"
+      - "version: server version"
+  
+  stream:
+    version: "1.0"
+    current_impl: "SYNC — execute handler, then chunk NDJSON"
+    chunk_format:
+      - "stream_chunk: <1024-byte chunk>"
+      - "index: chunk_order"
+      - "total_chunks: expected_count"
+      - "is_final: true on last chunk"
+    target: "true async (asyncio generator)"
+    changelog_ref: "v2.2.1 — 'Extend rac:stream to true async (asyncio generator)'"
+  
+  transfer:
+    version: "1.0"
+    description: "Large payload transfer (file, binary)"
+    status: "PLANNED"
+  
+  teleport:
+    version: "1.0"
+    description: "Execution migration across machines"
+    status: "PLANNED"
+```
+
+## 6. SIO-FPI Envelope Contract
+
+```yaml
+sio_contract:
+  wire_format: "sio-fpi-json-v1"
+  version: "1.0"
+  
+  envelope:
+    type: "{action: <str>, value: <any>, options: <dict>}"
+    payload: "{action, value, options}"
+    headers: "dict[str, str]"
+    context: "dict[str, any]"
+  
+  canonical_fields:
+    method: "<rac_method: call|batch|ping|instance|stream|watch|teleport|transfer|custom>"
+    actor: "<rac_uri>"
+    method: "<rac_method>"
+  
+  legacy_fields_for_compat:
+    request_id: "<auto or from headers>"
+    rac_uri: "<extracted from actor>"
+    operation: "<extracted from payload.action>"
+  
+  construction:
+    from_mcp_params: "Extract canonical fields from MCP params dict, derive action/rac_uri"
+    to_dict: "Serialize with auto trace_id + request_id in headers"
+```
+
+## 7. UniversalRouter Contract (Fallback Resolution)
+
+```yaml
+universal_router:
+  supported_forms:
+    form_1: "actor='text-editor', action='io.mcp.server.core.str.snake'"
+    form_2: "actor='text-editor/io/mcp/server', action='core.str.snake'"
+    form_3: "actor='text-editor/io/mcp/server/core', action='str.snake'"
+  
+  resolution_logic:
+    1: "Normalize actor path: '/' → '.'"
+    2: "concatenate: actor_path + '.' + action"
+    3: "strip leading identifier (text-editor variants)"
+    4: "walk registry tree: dict.get() → getattr()"
+  
+  registry_tree:
+    root: "io"
+      ├── "mcp"
+      │   └── "server"
+      │       └── "core"
+      │           ├── "file": {7 actions}
+      │           ├── "uri": {6 actions}
+      │           └── "str": {17 actions}
+      └── "rac"
+          └── "cri"
+              └── "fdi": {29 bindings}
+```
+
+## 8. Gap Register (from text-editor audit)
+
+```yaml
+gaps:
+  - id: "GAP-01"
+    component: "RAC URI V4"
+    severity: "HIGH"
+    description: "V3 grammar only, V4 grammar (rule.ownerspace.specs/path) not supported"
+    fix: "Extend _normalize_rac_v3_uri() for V4 segment parsing"
+  
+  - id: "GAP-04"
+    component: "FEH/ALR Sealing"
+    severity: "CRITICAL"
+    description: "No FEH hash computation or ALR entry sealing"
+    fix: "Add BLAKE3 + seal in SIORequest.to_dict()"
+    blocker: "CGE production promotion"
+  
+  - id: "GAP-05"
+    component: "rac:stream async"
+    severity: "MEDIUM"
+    description: "Sync execution then chunking, not true async"
+    fix: "Extend to asyncio generator"
+  
+  - id: "GAP-06"
+    component: "rac:import callable"
+    severity: "MEDIUM"
+    description: "Returns descriptor not actual callable"
+    fix: "Wire fdi.import_binding() into dispatch()"
+  
+  - id: "GAP-07"
+    component: "rac:instance lifecycle"
+    severity: "MEDIUM"
+    description: "Stub response, no lifecycle management"
+    fix: "Add open/execute/close API"
+```
+
+## 9. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+  ref_text_editor: "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+```

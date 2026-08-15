@@ -1,0 +1,42 @@
+# CONA://executor.py.v1/specs — Python Executor Technical Specification
+
+## Build Commands
+```bash
+# Rust bridge
+cargo build -p hace-sdk-executor-py
+
+# Python package
+cd sdk/executor-py
+python -m pip install -e .
+
+# Tests
+cargo test -p hace-sdk-executor-py
+python -m pytest tests/
+```
+
+## Key Types (Python)
+- `ExecuteParticle(ABC, Generic)` — base particle interface
+- `ExecContext` — execution context with sepi_prev, epoch
+- `ExecInput` / `ExecOutput` — I/O payloads
+- `SepiProof` — execution receipt (root, prev, epoch)
+- `SioEnvelope`, `SioResult`, `SioMetadata` — SIO framing
+- `FanId`, `FanCapability`, `FanRegistry` — FAN types
+- `ExecutorDNA`, `ActorExecutorMapping`, `FesLayer` — FES DNA
+
+## IPO Processing
+```python
+# Input  → normalize SIO, validate RAC URI, resolve ExecutionContext
+# Process → Capor (WHAT) + Racor (HOW/WHERE) + execute domain operation
+# Output → finalize SIO, seal ALR/FEH, dispatch forward
+```
+
+## CAPOR/RACOR
+- `CaporRouter` / `Scorer` / `SecurityProfile` — capability routing
+- `RacRouter` / `RacUri` / `RacRule` / `UriClassification` — transport routing
+
+## Evidence
+- `compute_feh_hash()` / `seal_alr_record()` / `build_proof()`
+
+## Status
+- **Complete**: Dual implementation (Python + Rust PyO3 bridge)
+- **Tests**: Rust 3 tests + Python pytest

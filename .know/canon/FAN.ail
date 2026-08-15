@@ -1,0 +1,134 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.fan.v1
+  intent: FAN_FEATURE_ARTIFACT_NAME_MAPPING
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+---
+
+# FAN — Feature ↔ Artifact ↔ Name Mapping
+# Authority: CSA-sealed
+
+## 1. Canonical Contract
+
+FAN = Feature ↔ Artifact ↔ Name — the canonical capability registry contract.
+Every Executor capability MUST register under a FanId with FanCapability.
+
+```yaml
+fan_contract:
+  fan_id:
+    type: "string"
+    pattern: "^[a-z0-9-]+$"
+    examples: ["text-editor-io-mcp-server-core-file", "hace-io-rac-cri-fdi"]
+  
+  capability_id:
+    type: "string"
+    pattern: "^[a-z0-9_.-]+$"
+    examples: ["file.read_file", "str.snake", "fdi.autoload"]
+  
+  executor:
+    type: "string"
+    examples: ["py-text-editor", "executor-py"]
+  
+  transport:
+    type: "string"
+    enum: ["FDI", "FPI", "FFI", "HTTP", "GRPC", "WASM", "LION", "RION"]
+  
+  handler:
+    type: "callable | module_path"
+```
+
+## 2. Canonical Fan Registrations for executor-py
+
+```yaml
+fan_registrations:
+  - fan_id: "hace-executor-py-core"
+    capabilities:
+      - "ipo.execute"
+      - "ipo.input"
+      - "ipo.process"
+      - "ipo.output"
+    executor: "executor-py"
+    transport: "FDI"
+    layer: "executor"
+    dna_ref: "executor-py"
+
+  - fan_id: "hace-executor-py-fdi"
+    capabilities:
+      - "fdi.autoload"
+      - "fdi.connect"
+      - "fdi.disconnect"
+      - "fdi.send"
+      - "fdi.recv"
+    executor: "executor-py"
+    transport: "FDI"
+    layer: "module"
+    parent: "executor-py"
+    specs: "fdi"
+    machine: "hace-lion-machine"
+
+  - fan_id: "hace-executor-py-fpi"
+    capabilities:
+      - "fpi.discover"
+      - "fpi.pair"
+      - "fpi.unpair"
+      - "fpi.invoke"
+      - "fpi.broadcast"
+    executor: "executor-py"
+    transport: "FPI"
+    layer: "module"
+    parent: "executor-py"
+    specs: "fpi"
+    machine: "hace-rion-machine"
+
+  - fan_id: "hace-executor-py-capror"
+    capabilities:
+      - "capor.resolve"
+      - "capor.evaluate"
+    executor: "executor-py"
+    transport: "FDI"
+    layer: "module"
+    parent: "executor-py"
+    machine: "hace-lion-machine"
+
+  - fan_id: "hace-executor-py-racor"
+    capabilities:
+      - "racor.resolve_target"
+      - "racor.resolve_route"
+      - "racor.resolve_transport"
+    executor: "executor-py"
+    transport: "FDI"
+    layer: "module"
+    parent: "executor-py"
+    machine: "hace-lion-machine"
+```
+
+## 3. Actor → Executor FAN Binding
+
+```yaml
+actor_executor_bindings:
+  text-ractor:
+    fan_id: "text-ractor"
+    executor: "executor-py"
+    modules:
+      - "hace-executor-py-core"
+      - "hace-executor-py-fdi"
+      - "hace-executor-py-fpi"
+      - "hace-executor-py-capror"
+      - "hace-executor-py-racor"
+    mode: "mcv"
+```
+
+## 4. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+```

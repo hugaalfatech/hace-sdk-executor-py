@@ -1,0 +1,189 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.fes.v1
+  intent: FES_FRACTAL_EXECUTE_STRUCTURE
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.actor.executor.docs.actor-executor.v1"
+    - "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+    - "AIL://rosa.forge.hace-lion-machine.docs.specs.v1"
+    - "AIL://rosa.forge.hace-rion-machine.docs.specs.v1"
+---
+
+# FES — Fractal Execute Structure
+# Authority: CSA-sealed
+# Layer: Engine → Executor → Module
+
+## 1. Canonical Three-Layer Model
+
+```text
+Runtime Component
+│
+├── Engine (Actor)
+│     Authority + Capability + Identity + Lifecycle + RAC Endpoint
+│     Examples: text-ractor, file-ractor, uri-ractor, image-ractor
+│
+├── Addon (Capacity Extension)
+│     Adapter, Plugin, Bridge, Driver, Provider, Connector, Fixer, Widget
+│
+├── Executor (Engine Part)
+│     Input → Process → Output (IPO)
+│     No Authority, No Identity, No Lifecycle, No RAC URI
+│     Examples: executor-py, patch-executor, diff-executor, scheduler-executor
+│
+└── Library / Module (Pure Algorithm)
+      rope, myers-diff, utf8, line-index, ast
+```
+
+## 2. Layer Properties
+
+### Engine (Actor) — Runtime Authority
+```yaml
+properties:
+  - Authority
+  - Capability
+  - Identity
+  - Lifecycle
+  - RAC Endpoint
+  - Receipt
+  - Telemetry
+  - Memory
+  - Transaction
+  - Contract
+can_run_independently: true
+```
+
+### Executor (Engine Part) — IPO Processor / MCV Controller
+```yaml
+properties:
+  - Input
+  - Process
+  - Output
+properties_absent:
+  - Authority
+  - Identity
+  - Lifecycle
+  - RAC URI
+can_run_independently: false
+runs_via: "RAC call through Actor"
+rac_router_role: "MCV Controller"  # M=Capor/Racor Model, C=IPO Controller, V=SIO View
+```
+
+### Module (Atomic Capability) — Capability Implementation
+```yaml
+properties:
+  - Single responsibility
+  - IPO compliant
+composition: "Executor composes Modules"
+```
+
+### Library (Pure Algorithm) — Technical Component
+```yaml
+properties:
+  - No runtime participation
+  - Used by Executor/Module/Addon
+```
+
+## 3. IPO Model (Mandatory Control-Flow Contract)
+
+```yaml
+ipo:
+  input:
+    - "normalize SIO envelope"
+    - "validate RAC URI"
+    - "resolve ExecutionContext"
+  process:
+    - "Capor (WHAT): capability resolution"
+    - "Racor (HOW/WHERE): transport + routing"
+    - "execute domain operation"
+  output:
+    - "finalize SIO envelope"
+    - "seal FEH + ALR"
+    - "dispatch forward"
+```
+
+## 4. Naming Grammar (Lexical Boundary = Runtime Discriminator)
+
+```yaml
+naming_grammar:
+  actor:
+    pattern: "^[a-z0-9]+(?:[/-][a-z0-9]+)*$"
+    examples: ["text-ractor", "actor/text-ractor", "provider/poolside/laguna"]
+    semantics: "namespace/hierarchy"
+    separators: ["/", "-"]
+  
+  executor:
+    pattern: "^[a-z0-9]+(?:[/-][a-z0-9]+)*$"
+    examples: ["executor-py", "text/patch-executor"]
+    semantics: "namespace/hierarchy"
+    separators: ["/", "-"]
+  
+  action:
+    pattern: "^[a-z0-9]+(?:[_.-][a-z0-9]+)*$"
+    examples: ["text.read", "file.write", "stream.sse", "tool_call.execute"]
+    semantics: "capability/action qualification"
+    separators: ["_", ".", "-"]
+  
+  feature:
+    pattern: "^[a-z0-9]+(?:[_.-][a-z0-9]+)*$"
+    examples: ["snake_case", "camelCase", "stream_sse_decode"]
+    semantics: "capability/action qualification"
+    separators: ["_", ".", "-"]
+```
+
+**Key Principle**: URI grammar ≠ Action/Feature grammar. The difference creates a lexical boundary for runtime type discrimination.
+
+## 5. FES DNA Types (Canonical Contract)
+
+```yaml
+fes_dna:
+  FesLayer:
+    values: [ENGINE, EXECUTOR, MODULE]
+    description: "Layer classification in FES model"
+  
+  EnginePart:
+    fields: [uri, name, layer, parent_uri, dna]
+    description: "Base descriptor for Executor or Module"
+  
+  ExecutorDNA:
+    fields: [trait, struct, features, bindings, lion_machine, rion_machine, sio_stream]
+    description: "Executor canonical definition (trait + struct + features)"
+  
+  ActorExecutorMapping:
+    fields: [actor_uri, actor_name, executor_uri, executor_name, modules, mode]
+    description: "Actor → Executor mapping contract"
+```
+
+## 6. Machine Binding
+
+```yaml
+machine_binding:
+  hace-lion-machine:
+    transports: [FDI, FFI, Wasm, Pipe, SharedMem]
+    mode: "local native"
+    runtime: "same-process / in-device"
+  
+  hace-rion-machine:
+    transports: [HTTP, gRPC, WebSocket, RION]
+    mode: "remote native"
+    runtime: "network / cross-process"
+  
+  hace-sio-stream:
+    transports: [FPI, SSE, WebSocket]
+    mode: "streaming"
+    runtime: "async generator"
+```
+
+## 7. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+  ref_actor_executor: "AIL://hace.actor.executor.docs.actor-executor.v1"
+  ref_rac_contracts: "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+```

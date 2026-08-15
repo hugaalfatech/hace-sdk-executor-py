@@ -1,0 +1,9 @@
+# SIO-CRI-FPI-V2 Schema Reference
+# Link to canonical schema: hace/io/.know/rc/schemas/sio-cri-fpi-v2.ail
+# Authority: CSA
+
+schema_reference:
+  source: "hace/io/.know/rc/schemas/sio-cri-fpi-v2.ail"
+  version: "2.0.0"
+  transport: "stdio"
+  encoding: "json"

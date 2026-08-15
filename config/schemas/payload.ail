@@ -1,0 +1,7 @@
+# Payload Schema Reference
+# Link to canonical schema: hace/io/.know/rc/schemas/payload.ail
+# Authority: CSA
+
+schema_reference:
+  source: "hace/io/.know/rc/schemas/payload.ail"
+  version: "1.0.0"

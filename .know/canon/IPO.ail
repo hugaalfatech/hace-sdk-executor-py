@@ -1,0 +1,149 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.ipo.v1
+  intent: IPO_INPUT_PROCESS_OUTPUT_MODEL
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.actor.executor.docs.actor-executor.v1"
+---
+
+# IPO — Input → Process → Output Model
+# Authority: CSA-sealed
+
+## 1. Canonical IPO Contract
+
+Every Fractal Executor MUST expose the IPO interface — mandatory control-flow contract.
+
+```yaml
+ipo_contract:
+  phases: [Input, Process, Output]
+  mandatory: true
+  evidence: "SepiProof (FEH + ALR) required on every execute()"
+  governance: "cross-cutting hooks via hok://executor-py/*"
+```
+
+## 2. Phase Specifications
+
+### INPUT Phase — Racee → SIO
+```yaml
+input:
+  role: "Racee (rac://...) → SIO normalization"
+  operations:
+    - "normalize RAC URI (V4 grammar: rac://{rule}.{ownerspace}.{specs}/{path})"
+    - "validate SIO envelope (version, type, payload, headers, context)"
+    - "resolve topology (FanId from URI path)"
+    - "create ExecContext (trace_id, security_tier, workspace_root, actor_target)"
+    - "create ExecInput (action, payload, headers, context)"
+  output_type: "IpoInput"
+  errors: ["INVALID_URI", "INVALID_SIO", "UNRESOLVED_TOPOLOGY"]
+```
+
+### PROCESS Phase — Execution Decision Point
+```yaml
+process:
+  role: "Capor (WHAT) + Racor (HOW/WHERE) → ExecuteParticle selection"
+  operations:
+    - "CaporRouter.resolve(ctx, fan_id) → CaporDecision (capability + security + scorer)"
+    - "RacRouter.resolve_route(fan_id, uri) → RacRoute (target + transport + machine + adapter)"
+    - "Select ExecuteParticle from FanRegistry by capability"
+    - "Determine ExecutionMode (LocalExecute, ChainExecute, SubExecute, ...)"
+  output_type: "IpoProcess"
+  errors: ["NO_CAPACITY", "NO_ROUTE", "UNRESOLVED_PARTICLE", "SECURITY_DENIED"]
+```
+
+### OUTPUT Phase — Finalize + Evidence + Dispatch
+```yaml
+output:
+  role: "ExecOutput + SepiProof → SIOResponse / forward / dispatch"
+  operations:
+    - "ExecuteParticle.execute(input, ctx) → ExecOutput (result + status + error + proof)"
+    - "build_proof(fan_id, action, input, result, ctx) → SepiProof (FEH + ALR)"
+    - "finalize SIO envelope (version, msg_id, source, target, sio_type, payload, metadata)"
+    - "invoke hok://executor-py/post_output hooks"
+    - "dispatch: return / forward to next / stream chunks"
+  output_type: "IpoOutput / SioResponse"
+  errors: ["EXEC_ERROR", "EVIDENCE_SEAL_FAILED", "DISPATCH_FAILED"]
+```
+
+## 3. Data Types
+
+```yaml
+ipo_types:
+  IpoInput:
+    fields:
+      - context: ExecContext
+      - fan_id: FanId
+      - normalized_uri: str
+      - validated_payload: ExecInput
+  
+  IpoProcess:
+    fields:
+      - capacity: CaporDecision     # WHAT
+      - route: RacRoute             # HOW/WHERE
+      - mode: ExecutionMode
+      - particle: ExecuteParticle
+  
+  IpoOutput:
+    fields:
+      - output: ExecOutput
+      - proof: SepiProof            # FEH + ALR
+```
+
+## 4. Execution Modes
+
+```yaml
+execution_modes:
+  PassThrough: "Direct pass-through, no sub-execution"
+  SubExecute: "Single nested execution"
+  ChainExecute: "Sequential chain of executions"
+  AggregateExecute: "Parallel aggregation of executions"
+  LocalExecute: "Local in-process execution (FDI/FFI)"
+```
+
+## 5. Capor + Racor Separation (Critical Invariant)
+
+```yaml
+capor_racor_invariant:
+  rule: "Capor resolves WHAT capacity; Racor resolves HOW/WHERE route; NEVER merged"
+  capor:
+    resolves: "capability, security_profile, scorer"
+    inputs: [ExecContext, FanId]
+    output: CaporDecision
+  
+  racor:
+    resolves: "target, transport, machine, endpoint, adapter"
+    inputs: [FanId, rac_uri]
+    output: RacRoute
+  
+  violation: "Merging Capor+Racor into single resolver breaks FES layer separation"
+```
+
+## 6. Evidence Requirement (Mandatory)
+
+```yaml
+evidence:
+  rule: "Every execute() MUST produce SepiProof"
+  feh:
+    algorithm: "SHA256 over canonical execution inputs + outputs"
+    fields: ["fan_id", "action", "payload", "context", "result", "timestamp"]
+  
+  alr:
+    algorithm: "SHA256 over execution record"
+    fields: ["execution_id", "fan_id", "action", "feh_hash", "status", "sealed_at"]
+  
+  seal_location: "SepiProof.feh_hash + SepiProof.alr_seal"
+  audit: "Auditor verifies FEH/ALR on every CAP invocation"
+```
+
+## 7. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+```

@@ -1,0 +1,168 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.rc.dna.v1
+  intent: EXECUTOR_PY_DNA
+  status: PRE_FORGE
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.io.canon.rac-protocol.specs.v1"
+    - "AIL://rosa.forge.hace-cep-resolver.rc.cep-resolver-rc.v1"
+---
+
+# Executor-Py SDK — DNA (Design Nucleotide)
+
+## 1. Canonical Position
+
+`hace/sdk/executor-py` provides Python-native **Fractal Executor** primitives
+that mirror the Rust `hace-sdk-executor-cep` IPO contract:
+
+```text
+                     CONA (Fractal Executor)
+                         │
+                ┌────────┴────────┐
+                ▼                 ▼
+            CAPOR             RACOR
+          (WHAT)            (HOW/WHERE)
+                │                 │
+                └────────┬────────┘
+                         ▼
+                    IPO Pipeline
+                   (Input→Port→Execute→Gate→Output)
+                         │
+                         ▼
+              Executor-Py / Executor-Rs (Native)
+```
+
+## 2. Architecture
+
+```text
+hace/sdk/executor-py/
+├── .know/
+│   ├── rc/dna.ail                 # THIS FILE — DNA (design nucleotide)
+│   └── concept/architecture.ail   # Concept layer
+├── src/
+│   └── executor_py/
+│       ├── __init__.py            # Public API exports
+│       ├── core.py                # Core types (ExecuteParticle, ExecInput, ExecOutput, etc.)
+│       ├── ipo.py                 # IPO Feature abstract trait (mirrors Rust IpoFeature)
+│       ├── capor.py               # CaporRouter (capacity resolution — WHAT)
+│       ├── racor.py               # RacRouter (route resolution — HOW/WHERE)
+│       ├── evidence.py            # SepiProof + FEH/ALR sealing
+│       ├── fan.py                 # FanId + FanCapability (FAN → capability)
+│       ├── payload.py             # Nep / uni-payload types
+│       ├── adapter.py             # LION/RION adapter interface
+│       └── simple.py              # Default IPO orchestrator implementation
+├── tests/
+│   ├── test_core.py
+│   ├── test_ipo.py
+│   ├── test_capor.py
+│   └── test_racor.py
+└── pyproject.toml
+```
+
+## 3. Core Traits (Python)
+
+### ExecuteParticle (mirrors Rust `ExecuteParticle`)
+
+```python
+class ExecuteParticle(ABC, Generic[T_in, T_out]):
+    @abstractmethod
+    async def execute(self, input: T_in, ctx: ExecContext) -> T_out:
+        ...
+```
+
+### IpoFeature (mirrors Rust `IpoFeature`)
+
+```python
+class IpoFeature(ABC, Generic[Request, Response]):
+    @abstractmethod
+    async def input(self, request: Request) -> IpoInput: ...
+    @abstractmethod
+    def process(self, ipo_input: IpoInput) -> IpoProcess: ...
+    @abstractmethod
+    async def output(self, ipo_process: IpoProcess) -> Response: ...
+    async def execute(self, request: Request) -> Response:  # default orchestration
+        ...
+```
+
+## 4. Integration with py-text-editor
+
+`py-text-editor` provides concrete `ExecuteParticle` implementations for:
+
+| Capability | Python Executor Package | File |
+|---|---|---|
+| `io.mcp.server.core.file.*` | `text-editor/io/mcp/server/core/file.py` | 7 actions |
+| `io.mcp.server.core.uri.*` | `text-editor/io/mcp/server/core/uri.py` | 6 actions |
+| `io.mcp.server.core.str.*` | `text-editor/io/mcp/server/core/str.py` | 17 actions |
+| `io.rac.cri.fdi.*` | `text-editor/io/rac/cri/fdi.py` | 29 FDI bindings |
+
+Each registers as a `FanCapability` under `FanId`:
+
+```yaml
+fan_registrations:
+  - id: "text-editor-io-mcp-server-core-file"
+    capabilities: ["file.create_file", "file.read_file", "file.append_file", ...]
+    executor: "py-text-editor"
+    transport: "FDI"
+
+  - id: "text-editor-io-mcp-server-core-str"
+    capabilities: ["str.snake", "str.camel", "str.headline", ...]
+    executor: "py-text-editor"
+    transport: "FDI"
+
+  - id: "text-editor-io-rac-cri-fdi"
+    capabilities: ["fdi.file.create_file", "fdi.file.read_file", ...]
+    executor: "py-text-editor"
+    transport: "FDI"
+```
+
+## 5. IPO Orchestration (Python → LION/RION)
+
+```text
+IpoOrchestrator
+    │
+    ├── CaporRouter.resolve()     → CaporDecision (WHAT capacity)
+    ├── RacRouter.resolve_route() → RoutePlan (HOW/WHERE transport)
+    │
+    ├── if transport ∈ {FDI, FFI}:
+    │       → LION Machine (local native)
+    ├── elif transport ∈ {HTTP, gRPC}:
+    │       → RION Machine (remote IO)
+    └── elif method == "stream":
+            → SIO Stream (hace-sio-stream)
+```
+
+## 6. Canonical Contract Alignment
+
+| Rust (executor-cep) | Python (executor-py) | Status |
+|---|---|---|
+| `IpoFeature` trait | `executor_py.IpoFeature` | ✓ Mirror |
+| `IpoInput` struct | `executor_py.IpoInput` | ✓ Mirror |
+| `IpoProcess` struct | `executor_py.IpoProcess` | ✓ Mirror |
+| `IpoOutput` struct | `executor_py.IpoOutput` | ✓ Mirror |
+| `IpoOrchestrator` | `executor_py.simple.DefaultIpoOrchestrator` | ✓ Mirror |
+| `CaporRouter` trait | `executor_py.CaporRouter` | ✓ Mirror |
+| `RacRouter` trait | `executor_py.RacRouter` | ✓ Mirror |
+| `ExecuteParticle` trait | `executor_py.ExecuteParticle` | ✓ Mirror |
+| `ExecContext` struct | `executor_py.ExecContext` | ✓ Mirror |
+| `ExecInput` / `ExecOutput` | `executor_py.ExecInput` / `ExecOutput` | ✓ Mirror |
+| `SepiProof` | `executor_py.SepiProof` | ✓ Mirror |
+| `FanId` / `FanCapability` | `executor_py.FanId` / `FanCapability` | ✓ Mirror |
+| `Nep` | `executor_py.Nep` | ✓ Mirror |
+| `RacUri` | `executor_py.RacUri` | ✓ Mirror (re-export) |
+| `RacRoute` | `executor_py.RacRoute` | ✓ Mirror |
+| `ExecutionMode` | `executor_py.ExecutionMode` | ✓ Mirror |
+
+## 7. DNA Invariants
+
+```yaml
+dna_invariants:
+  - "executor-py mirrors executor-cep IPO contract exactly (1:1 trait mapping)"
+  - "executor-py is for Python-native particles; NOT for wrapping Rust"
+  - "executor-py delegates transport resolution to LION Machine (local) or RION Machine (remote)"
+  - "Every execute() MUST produce SepiProof evidence (FEH + ALR)"
+  - "Capor resolves WHAT; Racor resolves HOW/WHERE; never merged"
+  - "py-text-editor capabilities register as FanCapability in executor-py FanRegistry"
+```

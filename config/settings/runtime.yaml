@@ -1,0 +1,49 @@
+# Runtime settings for executor-py
+# Authority: CSA
+
+runtime:
+  # Executor configuration
+  executor:
+    default_transport: "ffi"
+    default_machine: "hace-lion-machine"
+    max_concurrent_instances: 100
+    instance_timeout_ms: 30000
+  
+  # FDI configuration
+  fdi:
+    autoload_enabled: true
+    wire_transports: ["file", "pipe", "fd", "shm"]
+    default_method: "file"
+  
+  # FPI configuration
+  fpi:
+    discovery_enabled: true
+    wireless_transports: ["bluetooth", "nfc", "discovery", "pairing", "broadcast", "host_call"]
+    default_method: "host_call"
+    pairing_timeout_ms: 10000
+  
+  # FFI configuration
+  ffi:
+    native_enabled: true
+    safety_checks: true
+    default_method: "native"
+  
+  # Route resolution
+  route_resolution:
+    artifact_roots:
+      - "T:/hace/engine/hace"
+      - "T:/caw/minispace"
+    cache_ttl_seconds: 300
+    fallback_to_text_editor: true
+  
+  # Authority gates
+  authority:
+    ara_required_by_default: true
+    license_required_by_default: true
+    dev_mode_bypass: false
+  
+  # Evidence
+  evidence:
+    feh_enabled: true
+    alr_enabled: true
+    feh_algorithm: "SHA-256"

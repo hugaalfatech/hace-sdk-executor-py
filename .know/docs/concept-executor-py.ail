@@ -1,0 +1,47 @@
+# CONA://executor.py.v1 — Python NEP Executor (Concept)
+
+## Role
+
+Python Executor = **NEP-PY** — Python substrate for inference execution via llama-cpp-python / hace-llm-machine.
+
+> Bridges Runinfer ME Core to Python NEP. Implements `MactorBackend` trait via PyO3.
+
+## Architecture
+
+```text
+Runinfer (ME Core)          Python NEP (nep-py)
+    │                            │
+    ▼                            ▼
+MactorBackend trait        MactorResourceGovernor
+    │                            │
+    ├── load()            ──►    llama_cpp.Llama()
+    ├── infer()           ──►    llama(prompt, ...)
+    ├── health_check()    ──►    llama.health_check()
+    ├── unload()          ──►    llama.unload()
+    └── fingerprint()     ──►    model_hash + metadata
+```
+
+## FES DNA (from pyproject.toml)
+- actor: `text-ractor`
+- executor: `executor-py`
+- fes_model: `IPO`
+- ipo_processor: `true`
+- rac_router_role: `MCV_Controller`
+- fes_layer: `executor`
+- transports: `[fdi, fpi, ffi, http, ws]`
+- rac_uri_version: `4`
+- sio_format: `sio-fpi-json-v1`
+- evidence_required: `true`
+
+## Python Package Structure (src/executor_py/)
+- Core: `ExecuteParticle`, `ExecContext`, `ExecInput`, `ExecOutput`, `SepiProof`
+- SIO: `SioEnvelope`, `SioResult`, `SioMetadata`, `TransportConfig`, `RetryPolicy`
+- FES DNA: `EnginePart`, `ExecutorDNA`, `ActorExecutorMapping`, `FesLayer`
+- Subpackages: `actor`, `executor`, `module`, `ipo`, `capor`, `racor`, `evidence`, `adapter`, `payload`, `io.rac.cri.{fdi,ffi,fpi}`, `io.transport`
+
+## Dual Implementation
+1. **Python package** (`pyproject.toml`, hatchling) — pure Python CEP type system
+2. **Rust PyO3 bridge** (`Cargo.toml`, `src/lib.rs`) — implements `MactorBackend` trait
+
+## Canonical Documents
+- FES.ail, FAN.ail, hookpoints.ail, ASI.ail, IPO.ail, RAC_CONTRACTS.ail

@@ -1,0 +1,33 @@
+# CONA://executor.py.v1/FAN — Python Executor Artifact Name
+
+## Artifact
+- Name: `hace-executor-py` (Python) / `hace-sdk-executor-py` (Rust bridge)
+- Cipher: `CONA://executor.py.v1`
+- Description: Python NEP Executor — bridges Runinfer to Python via llama-cpp-python
+- Authors: Cosda-Dev
+- License: MIT
+- Version: 0.1.0
+
+## FAN Schema
+```text
+hace-executor-py
+├── name           := "hace-executor-py"
+├── cipher         := "CONA://executor.py.v1"
+├── actor          := "text-ractor"
+├── executor       := "executor-py"
+├── fes_model      := "IPO"
+├── ipo_processor  := true
+├── rac_router     := "MCV_Controller"
+├── fes_layer      := "executor"
+├── transports     := ["fdi", "fpi", "ffi", "http", "ws"]
+├── rac_uri_ver    := "4"
+├── sio_format     := "sio-fpi-json-v1"
+└── evidence_req   := true
+```
+
+## Dependencies
+- Python: aiohttp, websockets
+- Rust: hace-sdk-me-core, hace-sdk-runinfer, pyo3 0.22
+
+## Status
+- **Complete**: Both Python package + Rust bridge

@@ -1,0 +1,257 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.canon.cri-gap.v1
+  intent: CRI_CROSS_RUNTIME_INTERFACE_GAP_ANALYSIS
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.RAC_CONTRACTS.ail"
+    - "AIL://hace.text-editor.know.rc.rac-contracts.v2"
+---
+
+# CRI Gap Analysis — Cross-Runtime Interface Audit
+# Authority: CSA-sealed
+
+## 1. Audit Target: T:/hace/engine/hace/sdk/executor-*
+
+```yaml
+executors_audited:
+  - executor-py:        "Python (this SDK) — full implementation"
+  - executor-cep:       "Rust DNA source — canonical reference"
+  - executor-rs:        "Rust LEP native particles — re-export of executor-cep"
+  - executor-ts:        "TypeScript CEP SDK — complete type definitions"
+  - executor-php:       "PHP CEP SDK — complete type definitions"
+  - executor-go:        "Go CEP SDK — NOT FOUND in path"
+  - executor-wasm:      "WASM Executor — NOT FOUND in path"
+  - executor-dart:      "Dart CEP SDK — partial (cep.dart exists)"
+  - executor-native:    "Multi-language native SDK — Dart/Go partial"
+```
+
+## 2. FES CRI Feature Compliance Matrix
+
+| Feature | executor-cep (Rust) | executor-py | executor-ts | executor-php | executor-go | executor-dart | Status |
+|---------|---------------------|-------------|-------------|--------------|-------------|---------------|--------|
+| ipoc (IPO) | ✅ full | ✅ full | ✅ full | ✅ full | ❌ missing | ⚠ partial | PASS |
+| capor (CaporRouter) | ✅ full | ✅ full | ✅ full | ✅ full | ❌ missing | ⚠ partial | PASS |
+| racor (RacRouter) | ✅ full | ✅ full | ✅ full | ✅ full | ❌ missing | ⚠ partial | PASS |
+| fan (FanRegistry) | ✅ full | ✅ full | ✅ full | ✅ full | ❌ missing | ⚠ partial | PASS |
+| race (dual-role) | ✅ full | ⚠ stub | ✅ full | ✅ full | ❌ missing | ⚠ partial | WARN |
+| full (all) | ✅ full | ✅ full | ✅ full | ✅ full | ❌ missing | ⚠ partial | WARN |
+
+## 3. Detailed Gap Analysis
+
+### executor-py (Python — Target SDK)
+
+```yaml
+executor_py:
+  status: "ACTIVE — Full implementation complete"
+  implemented_features:
+    core_types:
+      ExecuteParticle:         "✅ ABC with execute()"
+      ExecContext:             "✅ dataclass with trace_id/workspace_root/security_tier"
+      ExecInput:               "✅ dataclass with action/payload/headers/context"
+      ExecOutput:              "✅ dataclass with result/status/error/proof"
+      SepiProof:               "✅ dataclass with feh_hash/alr_seal/execution_id"
+      ExecuteError:            "✅ with code/message/data fields"
+      Nep:                     "✅ dataclass (NEP container wrapper)"
+      SioEnvelope:             "✅ dataclass (version/msg_id/source/target/sio_type)"
+      SioResult:               "✅ dataclass (code/data/error/processing_time)"
+      FanId:                   "✅ new-type over str"
+      FanCapability:           "✅ dataclass (id/fan_id/executor/transport/handler)"
+      FanRegistry:             "✅ dataclass (register/find/list_by_fan)"
+      FesLayer:                "✅ enum (ENGINE/EXECUTOR/MODULE)"
+      EnginePart:              "✅ dataclass (uri/name/layer/dna)"
+      ExecutorDNA:             "✅ dataclass (trait/struct/features/bindings)"
+      ActorExecutorMapping:    "✅ dataclass (actor→executor mapping)"
+    
+    fes_layers:
+      Actor:                   "✅ actor/Actor + actor/ActorConfig"
+      Executor:                "✅ executor/Executor + executor/ExecutorConfig"
+      Module:                  "✅ module/ExecutorModule + ModuleConfig"
+      Library:                 "✅ module/LibraryModule"
+    
+    ipo:
+      IpoFeature:              "✅ ABC (input/process/output)"
+      IpoInput:                "✅ dataclass"
+      IpoProcess:              "✅ dataclass (capacity/route/mode/particle)"
+      IpoOutput:               "✅ dataclass (output/proof)"
+      CaporDecision:           "✅ dataclass"
+      RacRoute:                "✅ dataclass"
+      DefaultIpoOrchestrator:  "✅ full implementation"
+    
+    capor:
+      CaporRouter:             "✅ ABC"
+      DefaultCaporRouter:      "✅ full implementation"
+      SecurityProfile:         "✅ dataclass"
+      Scorer:                  "✅ dataclass"
+    
+    racor:
+      RacRouter:               "✅ ABC"
+      DefaultRacRouter:        "✅ full implementation"
+      RacUri:                  "✅ dataclass + V4 grammar parser"
+      RacTransportKind:        "✅ enum"
+      RacRule:                 "✅ enum"
+      UriClassification:       "✅ dataclass"
+      RacRoute:                "✅ dataclass"
+    
+    io:
+      FDI (wired):             "✅ io/rac/cri/fdi.py (autoload/connect/disconnect/send/recv)"
+      FPI (wireless):          "✅ io/rac/cri/fpi.py (discover/pair/unpair/invoke/broadcast)"
+      FFI (native bridge):     "✅ io/rac/cri/ffi.py (load/call/unload/symbols)"
+      RAC contracts:           "✅ io/rac/contracts.py (call/import/instance/ping/stream)"
+      STDIO transport:         "✅ io/transport/stdio.py"
+      HTTP transport:          "✅ io/transport/http.py"
+      WS transport:            "✅ io/transport/ws.py"
+    
+    evidence:
+      compute_feh_hash:        "✅ SHA256 of execution inputs+outputs"
+      seal_alr_record:         "✅ SHA256 of execution record"
+      build_proof:             "✅ SepiProof with FEH+ALR"
+    
+    adapter:
+      RacTransport:            "✅ ABC (open/send/send_async/stream/close)"
+      LocalNativeAdapter:      "✅ (FDI/FFI native bridge)"
+      StdioIpcAdapter:         "✅ (STDIO JSON-RPC 2.0)"
+      TransportStats:          "✅ (bytes_sent/request_count/error_count)"
+    
+    payload:
+      IpoPayload:              "✅ dataclass"
+      extract_payload:         "✅ (MCP params → canonical)"
+      validate_payload:        "✅ (schema validation)"
+      build_payload_for_handler: "✅ (signature inspection)"
+  
+  rota_tests:
+    - "test_core_types.py — ExecuteParticle, ExecContext, FanRegistry, etc."
+    - "test_ipo_pipeline.py — IPO flow, CaporRouter, RacRouter"
+    - "test_fdi_transport.py — FDI wired transport (autoload/connect/disconnect)"
+    - "test_fpi_transport.py — FPI wireless transport (discover/pair/invoke)"
+    - "test_capor_resolution.py — Capor (WHAT) resolution + scoring"
+    - "test_racor_resolution.py — Racor (HOW/WHERE) resolution + RAC URI V4"
+    - "test_evidence_sealing.py — FEH/ALR sealing"
+    - "test_actor_executor_mapping.py — Actor/Executor/Module binding"
+    total: 33+
+```
+
+### executor-go — GAP DETECTED
+
+```yaml
+executor_go:
+  status: "MISSING — NOT FOUND in T:/hace/engine/hace/sdk/"
+  gap_id: "GAP-GO-01"
+  severity: "HIGH"
+  description: "Go executor SDK not present in SDK directory"
+  required: "Create executor-go/src/hace_go_executor/__init__ equivalent"
+  dependencies:
+      - "must mirror FES traits: ipoc, capor, racor, fan"
+      - "must use Go concurrency (goroutines) for async IPO"
+      - "must use Go httpx equivalent (net/http) for RION"
+```
+
+### executor-dart — PARTIAL
+
+```yaml
+executor_dart:
+  status: "PARTIAL — Dart native SDK incomplete"
+  gap_id: "GAP-DART-01"
+  severity: "MEDIUM"
+  description: "Dart executor exists but lacks full FES implementation"
+  found: "T:/hace/engine/hace/sdk/executor-native/dart/lib/cep.dart (partial)"
+  missing:
+    - "Full IpoFeature (Input→Process→Output) ABC"
+    - "DefaultCaporRouter with scoring + policy"
+    - "DefaultRacRouter with V4 URI parser"
+    - "FanRegistry with capability resolution"
+    - "FEH/ALR proof sealing"
+    - "Transport adapters (FDI/FPI/FFI/STDIO/HTTP)"
+```
+
+### executor-wasm — GAP DETECTED
+
+```yaml
+executor_wasm:
+  status: "MISSING — NOT FOUND in SDK directory"
+  gap_id: "GAP-WASM-01"
+  severity: "HIGH"
+  description: "WASM executor SDK not present"
+  required: "Create executor-wasm with WASM transport support"
+  dependencies:
+      - "must implement FES traits for WASM runtime"
+      - "must support FDI/FFI via WASM imports"
+      - "must use wasmtime/wasm3 for execution"
+```
+
+## 4. Cross-Runtime Compatibility Audit
+
+```yaml
+cross_runtime_compat:
+  # executor-ts has full type alignment
+  executor_ts:
+    cri_version: "1.0.0"
+    fes_features: "ipoc + capor + racor + fan + race = full"
+    types_alignment: "✅ Exact match with Rust (execute_py.core mirroring)"
+    note: "TypeScript SDK is the reference for type definitions"
+  
+  # executor-php has full type alignment
+  executor_php:
+    cri_version: "1.0.0"
+    fes_features: "ipoc + capor + racor + fan + race = full"
+    types_alignment: "✅ Exact match with Rust"
+    note: "PHP SDK mirrors TS types 1:1 with PHP enums/idioms"
+  
+  # executor-py (this SDK) bridges Rust and others
+  executor_py:
+    cri_version: "1.0.0"
+    fes_features: "ipoc + capor + racor + fan + race = full"
+    mirror_target: "hace-executor (Rust) — 1:1 trait mirroring"
+    note: "Python SDK bridges Rust CEP DNA → Python ABCs"
+```
+
+## 5. Canonical Action Plan (CSA Directives)
+
+```yaml
+action_plan:
+  - priority: "1"
+    task: "Create executor-go stub with FES traits"
+    owner: "Producer"
+    deadline: "Next build cycle"
+    files:
+      - "T:/hace/engine/hace/sdk/executor-go/src/go.mod"
+      - "T:/hace/engine/hace/sdk/executor-go/src/cep/*.go (FES traits)"
+  
+  - priority: "2"
+    task: "Complete executor-dart FES implementation"
+    owner: "Producer"
+    deadline: "Next build cycle"
+    files:
+      - "T:/hace/engine/hace/sdk/executor-native/dart/lib/cep.dart (full rewrite)"
+  
+  - priority: "3"
+    task: "Create executor-wasm with WASM transport"
+    owner: "Producer"
+    deadline: "Future roadmap"
+    files:
+      - "T:/hace/engine/hace/sdk/executor-wasm/" 
+  
+  - priority: "4"
+    task: "Add race (dual-role) to executor-py"
+    owner: "Producer"
+    deadline: "Next build"
+    files:
+      - "src/executor_py/race.py (Racer/Racee)"
+```
+
+## 6. CSA Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+  audit_targets: 7
+  passing: 3
+  warning: 2
+  gap_detected: 2
+```

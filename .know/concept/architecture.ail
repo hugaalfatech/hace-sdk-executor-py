@@ -1,0 +1,205 @@
+---
+header:
+  id: AIL://hace.sdk.executor-py.know.concept.architecture.v1
+  intent: EXECUTOR_PY_ARCHITECTURE
+  status: FINAL SEALED
+  locale: en-core
+  authority: CSA
+  issued: "2026-08-12"
+  ref_canon:
+    - "AIL://hace.sdk.executor-py.know.canon.fes.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.fan.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.IPO.v1"
+    - "AIL://hace.sdk.executor-py.know.canon.RAC_CONTRACTS.ail"
+    - "AIL://rosa.forge.hace-cep-resolver.concept.cep-resolver-concept.v1"
+---
+
+# Executor-Py SDK — Concept Architecture (UPDATED)
+# Authority: CSA-sealed
+
+## 1. Canonical Position
+
+```text
+                    CONA (Fractal Executor)
+                         │
+                ┌────────┴────────┐
+                ▼                 ▼
+            CAPOR             RACOR
+          (WHAT)            (HOW/WHERE)
+                │                 │
+                └────────┬────────┘
+                         ▼
+                    IPO Pipeline
+                   (Input→Process→Output)
+                         │
+              ┌──────────┼──────────┐
+              ▼                       ▼
+     executor-py          executor-rs
+    (Python Native)      (Rust Native)
+         │                       │
+         ▼                       ▼
+   py-text-editor        Native Rust particles
+```
+
+## 2. Architecture (FES-Aligned)
+
+```text
+executor-py/
+├── .know/
+│   ├── canon/                    # CSA-sealed canonical documents
+│   │   ├── FES.ail               # Fractal Execute Structure model
+│   │   ├── FAN.ail               # Feature↔Artifact↔Name mapping
+│   │   ├── hookpoints.ail        # hok:// hookpoint registry
+│   │   ├── ASI.ail               # 4-plane integration (Assemble/Integrate/Verify/Crystallize)
+│   │   ├── IPO.ail               # Input→Process→Output model
+│   │   ├── RAC_CONTRACTS.ail     # CRI/FDI/FPI/FFI + RAC methods + gaps
+│   │   └── CRIGAP.ail            # Cross-Runtime Interface Gap Analysis
+│   ├── rc/dna.ail                # DNA (design nucleotide)
+│   └── concept/architecture.ail  # THIS FILE
+├── src/
+│   └── executor_py/
+│       ├── __init__.py           # Public API exports
+│       ├── core.py               # ExecuteParticle, ExecContext/ExecInput/ExecOutput,
+│       │                         # SepiProof, FanId/FanCapability/FanRegistry, Nep,
+│       │                         # SIO envelope types (SioEnvelope, SioResult, TransportConfig)
+│       ├── actor/                # Actor (Engine) — FES Layer: ENGINE
+│       │   └── __init__.py       # Actor, ActorConfig, CompositeActor, CompositeActorConfig
+│       ├── executor/             # Executor (Engine Part) — FES Layer: EXECUTOR
+│       │   └── __init__.py       # Executor, ExecutorConfig, SimpleExecutor
+│       ├── module/               # Module (Capability) — FES Layer: MODULE
+│       │   └── __init__.py       # ExecutorModule, ModuleConfig, FdiModule, FpiModule, LibraryModule
+│       ├── ipo.py                # IpoFeature trait, IpoInput/Process/Output,
+│       │                         # IpoOrchestrator, CaporDecision, RacRoute,
+│       │                         # DefaultIpoOrchestrator
+│       ├── capor.py              # CaporRouter trait, DefaultCaporRouter,
+│       │                         # SecurityProfile, Scorer
+│       ├── racor.py              # RacRouter trait, DefaultRacRouter,
+│       │                         # RacUri (V4 parser), RacTransportKind, RacRule,
+│       │                         # UriClassification
+│       ├── evidence.py           # compute_feh_hash, seal_alr_record, build_proof
+│       ├── payload.py            # IpoPayload, ValidatedPayload, extract_payload, validate_payload
+│       ├── adapter.py            # RacTransport trait (mirrors io/rac/src/core.rs),
+│       │                         # LocalNativeAdapter, StdioIpcAdapter
+│       ├── simple.py             # SimpleExecutor (default IPO orchestrator)
+│       └── io/                   # RAC transport layer
+│           ├── __init__.py
+│           ├── rac/
+│           │   ├── __init__.py
+│           │   ├── cri/
+│           │   │   ├── __init__.py
+│           │   │   ├── fdi.py    # FDI: Wired/autoload (USB cable)
+│           │   │   ├── fpi.py    # FPI: Wireless (Bluetooth/NFC)
+│           │   │   └── ffi.py    # FFI: Native bridge (zero-copy)
+│           │   └── contracts.py  # RAC Method Contracts (call/import/instance/ping/stream)
+│           └── transport/        # RION transports
+│               ├── __init__.py
+│               ├── stdio.py   # STDIO JSON-RPC 2.0
+│               ├── http.py    # HTTP/JSON bridge
+│               └── ws.py      # WebSocket bridge
+├── tests/
+│   ├── rota/                     # Runtime Operation Test Audit
+│   │   ├── test_core_types.py
+│   │   ├── test_ipo_pipeline.py
+│   │   ├── test_fdi_transport.py
+│   │   ├── test_fpi_transport.py
+│   │   ├── test_capor_resolution.py
+│   │   ├── test_racor_resolution.py
+│   │   ├── test_evidence_sealing.py
+│   │   └── test_actor_executor_mapping.py
+├── scripts/                     # check.ps1, test.ps1, crystallize.ps1, seal.ps1
+└── pyproject.toml
+```
+
+## 3. FES IPO Flow
+
+```text
+Caller
+    │
+    │ rac://cri.hace.fdi/hace/py-text-editor/file/read_file
+    │ SIORequest { method: "call", actor: "<rac_uri>", payload: {...} }
+    ▼
+Actor.execute()
+    │
+    ├── IpoFeature.input()
+    │   ├── normalize RAC URI → RacUri (V4 parser)
+    │   ├── validate SIO
+    │   ├── resolve topology → FanId
+    │   └── create ExecContext + ExecInput
+    │
+    ├── IpoFeature.process()
+    │   ├── CaporRouter.resolve() → CaporDecision (WHAT capacity)
+    │   ├── RacRouter.resolve_route() → RacRoute (HOW/WHERE transport + machine)
+    │   ├── CEP Resolver → ExecutionPlan (method routing)
+    │   └── Select ExecuteParticle from FanRegistry
+    │
+    ├── ExecuteParticle.execute()
+    │   ├── Domain logic (file read, string transform, ...)
+    │   └── Produce ExecOutput + SepiProof (FEH + ALR)
+    │
+    └── IpoFeature.output()
+        ├── finalize SIO
+        ├── seal evidence (proof.seal())
+        └── return SioResponse
+```
+
+## 4. FES Layer Mapping
+
+| Layer | Class | Purpose | Authority |
+|---|---|---|---|
+| ENGINE | Actor | Runtime Engine with Authority + Lifecycle | Full |
+| EXECUTOR | Executor | IPO Processor / MCV Controller | No Authority |
+| MODULE | ExecutorModule | Atomic Capability Implementation | No Authority |
+| LIBRARY | LibraryModule | Pure Algorithm/Data | No Authority |
+
+## 5. Integration with py-text-editor
+
+| Capability Namespace | Executor Package | Register Path |
+|---|---|---|
+| `io.mcp.server.core.file.*` | `text-editor/io/mcp/server/core/file.py` | `registry.register(FanCapability(..., executor="py-text-editor"))` |
+| `io.mcp.server.core.uri.*` | `text-editor/io/mcp/server/core/uri.py` | same |
+| `io.mcp.server.core.str.*` | `text-editor/io/mcp/server/core/str.py` | same |
+| `io.rac.cri.fdi.*` | `text-editor/io/rac/cri/fdi.py` | same |
+
+## 6. Forge Integration (hace-rosa/forge/)
+
+| Module | Role | Integrates With |
+|---|---|---|
+| `hace-cep-resolver` | Method Router (CEP) | Capor + Racor + LION/RION |
+| `hace-lion-exchange` | Registry/Binding/Discovery | FanRegistry + Actor/Executor |
+| `hace-lion-machine` | Local IO Execution (5-module pipeline) | FDI/FFI/MCP adapters |
+| `hace-racor-resolver` | Route Resolution (HOW/WHERE) | RacRouter + RAC URI V4 |
+| `hace-rion-machine` | Remote IO (AMO/httpx) | HttpTransport + GrpcBridge |
+| `hace-sio-stream` | Streaming Transport | FPI/Wireless + SSE/WS |
+
+## 7. Canonical Contract Alignment
+
+| Rust (executor-cep) | Python (executor-py) | Status |
+|---|---|---|
+| `IpoFeature` trait | `executor_py.IpoFeature` | ✓ Mirror |
+| `IpoInput` struct | `executor_py.IpoInput` | ✓ Mirror |
+| `IpoProcess` struct | `executor_py.IpoProcess` | ✓ Mirror |
+| `IpoOutput` struct | `executor_py.IpoOutput` | ✓ Mirror |
+| `ExecuteParticle` trait | `executor_py.ExecuteParticle` | ✓ Mirror |
+| `ExecContext` struct | `executor_py.ExecContext` | ✓ Mirror |
+| `ExecInput` / `ExecOutput` | `executor_py.ExecInput` / `ExecOutput` | ✓ Mirror |
+| `SepiProof` struct | `executor_py.SepiProof` | ✓ Mirror |
+| `CaporRouter` trait | `executor_py.CaporRouter` | ✓ Mirror |
+| `CaporDecision` struct | `executor_py.CaporDecision` | ✓ Mirror |
+| `RacRouter` trait | `executor_py.RacRouter` | ✓ Mirror |
+| `RacRoute` struct | `executor_py.RacRoute` | ✓ Mirror |
+| `RacUri` (V4 parser) | `executor_py.RacUri` | ✓ Mirror |
+| `RacTransport` trait | `executor_py.RacTransport` | ✓ Mirror |
+| `FanId` / `FanCapability` | `executor_py.FanId` / `FanCapability` | ✓ Mirror |
+| `FesLayer` enum | `executor_py.FesLayer` | ✓ FES |
+| `ExecutorDNA` struct | `executor_py.ExecutorDNA` | ✓ FES |
+| `ActorExecutorMapping` | `executor_py.ActorExecutorMapping` | ✓ FES |
+| `ExecutionMode` enum | `executor_py.ExecutionMode` | ✓ Mirror |
+
+## 8. CSI Seal
+
+```yaml
+seal:
+  authority: "CSA"
+  status: "FINAL SEALED"
+  sealed_at: "2026-08-12"
+```
