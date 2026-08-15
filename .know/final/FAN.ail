@@ -1,33 +1,85 @@
 # CONA://executor.py.v1/FAN — Python Executor Artifact Name
+# P1-B Invariant: NEP-PY substrate (no CAPOR/RACOR canonical ownership)
 
 ## Artifact
 - Name: `hace-executor-py` (Python) / `hace-sdk-executor-py` (Rust bridge)
 - Cipher: `CONA://executor.py.v1`
-- Description: Python NEP Executor — bridges Runinfer to Python via llama-cpp-python
+- Description: Python NEP-PY substrate — bridges Runinfer to Python inference via llama-cpp-python
 - Authors: Cosda-Dev
 - License: MIT
-- Version: 0.1.0
+- Version: 0.1.0 (P1-B semantic locked)
+
+## Semantic Lock (Rule 1 + Rule 2 + Rule 3)
+```yaml
+executor_py:
+  semantic: NEP-PY
+  role: inference_substrate
+  boundary_note: >
+    executor-py provides NEP-PY backend implementation and
+    FDI/FPI/FFI transport adapters for inference routing.
+    The capor.py, racor.py, ipo.py, fan.py modules in this repo
+    are LEGACY wrappers that delegate to the canonical execution layer.
+    Canonical owners remain:
+      - capor  → executor-native / cona/capor
+      - racor  → executor-native / cona/racor
+      - ipo    → executor-native / cona/ipo
+      - fan    → cona/fem kernel
+      - race   → cona/ractor
+  owns:
+    - neps_py
+    - pyo3_bridge
+    - llama_cpp_python_binding
+    - inference_dispatch
+  does_not_own:
+    - capor       # canonical owner: cona/capor or executor-native
+    - racor       # canonical owner: cona/racor or executor-native
+    - ipo         # canonical owner: cona/ipo or executor-native
+    - fan         # canonical owner: cona/fem kernel
+    - race        # canonical owner: cona/ractor
+  consumed_by:
+    - mactor      # via NepRef
+    - runinfer    # via MactorRef
+```
+
+## Canonical Flow
+```text
+Runinfer Composition Engine
+    │
+    ▼
+MactorRef
+    │
+    ▼
+NepRequirement / NepRef
+    │
+    ▼
+NEP-PY (executor-py)
+    │
+    ├── PyO3 bridge
+    ├── llama-cpp-python
+    └── inference dispatch
+```
 
 ## FAN Schema
 ```text
 hace-executor-py
 ├── name           := "hace-executor-py"
 ├── cipher         := "CONA://executor.py.v1"
-├── actor          := "text-ractor"
-├── executor       := "executor-py"
-├── fes_model      := "IPO"
-├── ipo_processor  := true
-├── rac_router     := "MCV_Controller"
-├── fes_layer      := "executor"
-├── transports     := ["fdi", "fpi", "ffi", "http", "ws"]
+├── semantic       := "NEP-PY"
+├── role          := inference_substrate
+├── transports     := ["fdi", "fpi", "ffi"]
 ├── rac_uri_ver    := "4"
 ├── sio_format     := "sio-fpi-json-v1"
 └── evidence_req   := true
 ```
 
 ## Dependencies
-- Python: aiohttp, websockets
-- Rust: hace-sdk-me-core, hace-sdk-runinfer, pyo3 0.22
+- Python: aiohttp, websockets, llama-cpp-python (via PyO3 bridge)
+- Rust: hace-sdk-me-core, pyo3 0.22 (bridge only — no CAPOR ownership)
+
+## Invariant (CGE P1-B)
+- MactorBackend trait does NOT return to FIM.
+- executor-py = NEP-PY substrate implementation, not inference layer owner.
+- FDI/FPI/FFI adapters are transport bridges, not routing authority.
 
 ## Status
-- **Complete**: Both Python package + Rust bridge
+**P1-B SEMANTIC LOCKED**: No aggressive refactor. Boundary documented. Legacy CAPOR/RACOR/IPO wrappers marked as delegates.
